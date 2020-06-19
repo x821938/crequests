@@ -6,14 +6,16 @@ cacheDir = "tests/cachedir"
 
 
 def test_cacheDirCreation():
-    shutil.rmtree(cacheDir)  # Remove the cache dir if it exists... We want to start from fresh
+    shutil.rmtree(
+        cacheDir, ignore_errors=True
+    )  # Remove the cache dir if it exists... We want to start from fresh
 
     crs = CRequests(cacheDir)  # Create an instance of "crequests" that we are testing
     assert os.path.isdir(cacheDir)  # An instance of crequest should create a cachedir
 
 
 def test_cacheMiss():
-    shutil.rmtree(cacheDir)  # Clear cache first
+    shutil.rmtree(cacheDir, ignore_errors=True)  # Clear cache first
 
     crs = CRequests(cacheDir)
     response = crs.get("http://httpbin.org/get")  # A good testsite for https requests
@@ -43,7 +45,7 @@ def test_cacheHit():
 
 
 def test_cacheSameAsOriginal():
-    shutil.rmtree(cacheDir)  # Clear cache first
+    shutil.rmtree(cacheDir, ignore_errors=True)  # Clear cache first
 
     # Get an uncached response
     crs1 = CRequests(cacheDir)
