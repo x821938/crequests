@@ -1,16 +1,16 @@
-from crequests import CRequests
+import crequests
 import logging
 from bs4 import BeautifulSoup
 
 logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s [%(name)s] %(levelname)7s: %(message)s", datefmt="%H:%M:%S",
+    level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)7s: %(message)s", datefmt="%H:%M:%S",
 )
 
-url = "http://www.github.com"
+url = "http://httpbin.org/html"
 
-crs = CRequests("cachedata")
+crs = crequests.Session("cachedata")
 for _ in range(3):  # Do the same over and over... Check that we get cache hits - this should be fast
-    rawHtml = crs.put(url).content
+    rawHtml = crs.get(url).content
     if rawHtml:
         soup = BeautifulSoup(rawHtml, "html.parser")
-        print(soup.title.text)
+        print(soup.body.h1)

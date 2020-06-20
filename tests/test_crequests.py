@@ -1,6 +1,6 @@
 import shutil
 import os
-from crequests import CRequests
+import crequests
 
 cacheDir = "tests/cachedir"
 
@@ -10,14 +10,14 @@ def test_cacheDirCreation():
         cacheDir, ignore_errors=True
     )  # Remove the cache dir if it exists... We want to start from fresh
 
-    crs = CRequests(cacheDir)  # Create an instance of "crequests" that we are testing
+    crs = crequests.Session(cacheDir)  # Create an instance of "Session" that we are testing
     assert os.path.isdir(cacheDir)  # An instance of crequest should create a cachedir
 
 
 def test_cacheMiss():
     shutil.rmtree(cacheDir, ignore_errors=True)  # Clear cache first
 
-    crs = CRequests(cacheDir)
+    crs = crequests.Session(cacheDir)
     response = crs.get("http://httpbin.org/get")  # A good testsite for https requests
     assert response.status_code == 200  # Should get without https errors
     assert os.path.isfile(f"{cacheDir}/httpbin.org/80/80af113bc0b984440da4125b41e838dd13b0969e")  # hash good?
@@ -33,7 +33,7 @@ def test_cacheHit():
     test_cacheMiss()  # Make sure something is in our cache
 
     # Second time we get the URL, it should be in the cache
-    crs = CRequests(cacheDir)
+    crs = crequests.Session(cacheDir)
     response = crs.get("http://httpbin.org/get")
     assert response.status_code == 200
     assert crs.lastReqWasCashed
@@ -48,12 +48,12 @@ def test_cacheSameAsOriginal():
     shutil.rmtree(cacheDir, ignore_errors=True)  # Clear cache first
 
     # Get an uncached response
-    crs1 = CRequests(cacheDir)
+    crs1 = crequests.Session(cacheDir)
     response1 = crs1.get("http://github.com")
     assert not crs1.lastReqWasCashed
 
     # Get a cached response
-    crs2 = CRequests(cacheDir)
+    crs2 = crequests.Session(cacheDir)
     response2 = crs2.get("http://github.com")
     assert crs2.lastReqWasCashed
 

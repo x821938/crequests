@@ -7,14 +7,14 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 
-class CRequests(requests.Session):
+class Session(requests.Session):
     def __init__(self, cacheFolder):
         """Constructor. Create cachefolder, if it doesn't exist already
 
         Args:
             cacheFolder (str): Folder where scaping cache content should be stored.
         """
-        self.logger = logging.getLogger(__name__)  # Use our own logging instance
+        self.logger = logging.getLogger("crequests.Session")  # Use our own logging instance
         self.logger.debug(f"CacheScrape is using {cacheFolder} as cache directory")
 
         self.cacheFolder = cacheFolder
