@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="crequests",
-    version="0.2.2",
+    version="0.2.3",
     author="Alex Skov Jensen",
     author_email="pydev@offline.dk",
     description="A lightweight cache wrapper for requests",

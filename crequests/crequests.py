@@ -62,7 +62,7 @@ class Session(requests.Session):
         """
         filefullpath = fileInfo["filefullpath"]
         filedir = fileInfo["filedir"]
-        self.logger.info(f"Writing cachefile '{filefullpath}' with content of '{url}'")
+        self.logger.debug(f"Writing cachefile '{filefullpath}' with content of '{url}'")
 
         Path(filedir).mkdir(parents=True, exist_ok=True)  # Make sure there is a dir for the file
         with gzip.open(filefullpath, "wb") as fp:  # Save a gzip compressed pickle of response
@@ -83,13 +83,13 @@ class Session(requests.Session):
         """
         filename = fileInfo["filefullpath"]
         if Path(filename).is_file():
-            self.logger.info(f"CACHE-HIT. '{url}' got cacheinfo in '{filename}'")
+            self.logger.debug(f"CACHE-HIT. '{url}' got cacheinfo in '{filename}'")
             with gzip.open(filename, "rb") as fp:  # Load a gzip compressed pickle of response
                 pickleData = fp.read()
                 requestObject = pickle.loads(pickleData)
                 self.__lastReqWasCashed = True
         else:  # Cache file does not exist
-            self.logger.info(f"CACHE-MISS. '{url}' not in cache.")
+            self.logger.debug(f"CACHE-MISS. '{url}' not in cache.")
             requestObject = None
             self.__lastReqWasCashed = False
         return requestObject
@@ -111,13 +111,13 @@ class Session(requests.Session):
         """
         fileInfo = self.__getCacheFileInfo(method, url, **kwargs)
 
-        self.logger.debug(f"{method} request for {url}")
+        self.logger.debug("{method} request for {url}")
         responseObject = None
         if not forceRefresh:  # If we are not overriding cache, we load file from cache
             responseObject = self.__readCacheFile(url, fileInfo)
         if (responseObject is None) or forceRefresh:
             # If no data in cachefile, or we are overriding, then get from web
-            self.logger.info(f"Getting data directly from: {url}")
+            self.logger.debug(f"Getting data directly from: {url}")
             responseObject = super().request(method, url, **kwargs)
             self.__writeCacheFile(url, responseObject, fileInfo)
         return responseObject
