@@ -59,3 +59,24 @@ def test_cacheSameAsOriginal():
 
     # The content of those 2 should be the same
     assert response1.content == response2.content
+
+
+def test_damagedCache():
+    shutil.rmtree(cacheDir, ignore_errors=True)  # Clear cache first
+
+    crs = crequests.Session(cacheDir)
+    response = crs.get("http://httpbin.org/get")  # A good testsite for https requests
+
+    response = crs.get("http://httpbin.org/get")  # Get the content again - should get cached version
+    assert crs.lastReqWasCashed
+
+    # Now we damage the cachefile
+    with open(f"{cacheDir}/httpbin.org/80/80af113bc0b984440da4125b41e838dd13b0969e", "r+") as fp:
+        fp.seek(0, 0)
+        fp.write("garbage")
+
+    response = crs.get("http://httpbin.org/get")  # Get the content again - should try the cache and fail
+    assert not crs.lastReqWasCashed
+
+    response = crs.get("http://httpbin.org/get")  # Now we should have a good cache entry again
+    assert crs.lastReqWasCashed

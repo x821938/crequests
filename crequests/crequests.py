@@ -84,10 +84,15 @@ class Session(requests.Session):
         filename = fileInfo["filefullpath"]
         if Path(filename).is_file():
             self.logger.debug(f"CACHE-HIT. '{url}' got cacheinfo in '{filename}'")
-            with gzip.open(filename, "rb") as fp:  # Load a gzip compressed pickle of response
-                pickleData = fp.read()
-                requestObject = pickle.loads(pickleData)
-                self.__lastReqWasCashed = True
+            try:
+                with gzip.open(filename, "rb") as fp:  # Load a gzip compressed pickle of response
+                    pickleData = fp.read()
+                    requestObject = pickle.loads(pickleData)
+                    self.__lastReqWasCashed = True
+            except:
+                self.logger.error(f"Damaged cache file '{filename}' for url '{url}'")
+                requestObject = None
+                self.__lastReqWasCashed = False
         else:  # Cache file does not exist
             self.logger.debug(f"CACHE-MISS. '{url}' not in cache.")
             requestObject = None
