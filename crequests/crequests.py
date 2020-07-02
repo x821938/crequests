@@ -21,6 +21,7 @@ class Session(requests.Session):
         Path(cacheFolder).mkdir(parents=True, exist_ok=True)
 
         self.__lastReqWasCashed = False
+        self.__lastCacheReqHadErrors = False
 
         super().__init__()
 
@@ -60,16 +61,21 @@ class Session(requests.Session):
             url (str): URL url where that cache content comes from
             urlContent (requests.response): the raw content from the webpage
         """
+        self.__lastCacheReqHadErrors = False
         filefullpath = fileInfo["filefullpath"]
         filedir = fileInfo["filedir"]
         self.logger.debug(f"Writing cachefile '{filefullpath}' with content of '{url}'")
 
-        Path(filedir).mkdir(parents=True, exist_ok=True)  # Make sure there is a dir for the file
-        with gzip.open(filefullpath, "wb") as fp:  # Save a gzip compressed pickle of response
-            pickleData = pickle.dumps(requestObject)
-            fp.write(pickleData)
-        with open(f"{filefullpath}_url.txt", "w") as fp:  # Save metadata about the webcontent
-            fp.write(url)
+        try:
+            Path(filedir).mkdir(parents=True, exist_ok=True)  # Make sure there is a dir for the file
+            with gzip.open(filefullpath, "wb") as fp:  # Save a gzip compressed pickle of response
+                pickleData = pickle.dumps(requestObject)
+                fp.write(pickleData)
+            with open(f"{filefullpath}_url.txt", "w") as fp:  # Save metadata about the webcontent
+                fp.write(url)
+        except:
+            self.logger.error(f"Cant write cache file '{filefullpath}' for '{url}'")
+            self.__lastCacheReqHadErrors = True
 
     def __readCacheFile(self, url, fileInfo):
         """Reads raw webcontent from a cachefile that is derived from the URL.
@@ -130,3 +136,7 @@ class Session(requests.Session):
     @property
     def lastReqWasCashed(self):
         return self.__lastReqWasCashed
+
+    @property
+    def lastCacheReqHadErrors(self):
+        return self.__lastCacheReqHadErrors
